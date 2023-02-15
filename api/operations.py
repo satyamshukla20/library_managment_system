@@ -23,7 +23,7 @@ def search():
 @operation_api.route('/hypersearch',methods=['POST'])
 def hypersearch():
     """
-        this is the hypersearch endpoint
+        this is the hypersearch endpoint it's a higher level of search.
     """
     request_data=request.json
     book_name=request_data.get("book_name")
