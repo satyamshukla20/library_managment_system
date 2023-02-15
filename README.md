@@ -1,0 +1,2 @@
+# Instruction for adding books
+For loading books in database we have to create a .env file with the key of api as we can see in .env.example. For creating the variable we have to go on rapid api and get it from hapi books.
