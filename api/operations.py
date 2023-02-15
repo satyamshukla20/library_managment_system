@@ -14,9 +14,13 @@ def search():
     """
     request_data=request.json
     book_name=request_data.get("book_name")
-    member_list=list(Books.select(Books.q.name==book_name))
-    if len(member_list)!=0:
-       return {"message":"This book is available."}
+    book_list=list(Books.select(Books.q.name==book_name))
+    if len(book_list)!=0:
+       book=book_list[0]
+       if book.quantity>0:
+           return {"message":"This book is available."}
+       else:
+           {"message":"This book was available in library but they have been issued."}
     return {"message":"This book is not available."}
 
 
@@ -62,7 +66,7 @@ def issue():
     book=list_of_book[0]
     if book.quantity==0:
         return {"message":f"{book_name} is not available whenever it will be returned we will let you know"}
-    if member.debt<-500:
+    if member.debt>500:
         return {"message":"Your balance is less than minimum criteria. Please recharge your account"}
     book_id=book.id
     transaction=Transactions(book_id=book_id,member_id=member_id)
@@ -104,22 +108,21 @@ def book_return():
                 fine=(total_days-14)*10
                 transaction.fine=fine
                 member=list(Members.select(Members.q.id==transaction.member_id))[0]
-                member.debt-=fine
+                member.debt+=fine
 
-            if member.debt<-500:
-                return  {"message":f"your fine is rupees {fine} , and your current balance is {member.debt} which is less than minimum criteria, please RECHARGE otherwise you will be unable to use our services.Thanks for using the book"}
-            return {"message":f"your fine is rupees {fine} , and your current balance is {member.debt} thanks for using the book"}
+            if member.debt>500:
+                return  {"message":f"your fine is rupees {fine} , and your debt is {member.debt} which is less than minimum criteria, please RECHARGE otherwise you will be unable to use our services.Thanks for using the book"}
+            return {"message":f"your fine is rupees {fine} , and your debt is {member.debt} thanks for using the book"}
         else:
             return {"message":"This transaction is now expired kindly give a appropriate transaction id."}
     else:
         return {"message":"this is a wrong transaction_id, Please provide a valid one"}
 
-@operation_api.route('/collect_fine',methods=['POST'])
+@operation_api.route('/payment',methods=['POST'])
 def fine():
     """
-    this is the collectfine endpoint
+    this is the payment endpoint
     """
-    print("asdfafa")
     request_data=request.json
     member_id=request_data.get("member_id")
     payment=request_data.get("payment_amount")
@@ -127,9 +130,9 @@ def fine():
     if len(member_list)!=0:
         
         member=member_list[0]
-        member.debt+=payment
+        member.debt-=payment
         member.total_payment+=payment
-        return {"message":f"{payment} rupee has been transferred and now the balance is {member.debt} "}
+        return {"message":f"{payment} rupee has been transferred and now the remaining debt is {member.debt} "}
     return {"message":"This id is not a valid member_id. Please register first."}
 
 
