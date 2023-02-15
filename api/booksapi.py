@@ -33,7 +33,7 @@ def loadbooks():
                 author=i['author']
                 Books(name=name,author=author)
     except dberrors.DuplicateEntryError:
-        return {"message":"books are already loaded."}
+        return {"message":"books are already loaded."}, 200
 
     return {"message":"books have been successfully loaded in the database."}
 
@@ -47,7 +47,7 @@ def addbooks():
     author=request_data.get('author')
     quantity=request_data.get('quantity')
     book=Books(name=name,author=author,quantity=quantity)
-    return {"message":f"{name} has been successfully added."}
+    return {"message":f"{name} has been successfully added."},200
 
 @book_api.route('/book/<id>', methods = ['DELETE'])
 def book_delete(id):
@@ -57,9 +57,9 @@ def book_delete(id):
     try:
         book = Books.get(id)
     except SQLObjectNotFound:
-        return {"message":"please enter a valid id"}
+        return {"message":"please enter a valid id"},404
     book.delete(id)
-    return {"message":f"book with {id} as id is deleted"}
+    return {"message":f"book with {id} as id is deleted"},200
  
 @book_api.route("/book/<id>", methods=["PUT"])
 def book_update(id):
@@ -69,9 +69,9 @@ def book_update(id):
     try:
         book = Books.get(id)
     except SQLObjectNotFound:
-        return {"message":"please enter a valid book_id"}
+        return {"message":"please enter a valid book_id"},400
     request_data=request.json
     book.name=request_data.get("name")
     book.author=request_data.get("author")
     book.quantity=request_data.get("quantity")
-    return f"book id : {id} has been updated"
+    return f"book id : {id} has been updated",200

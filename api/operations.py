@@ -18,10 +18,10 @@ def search():
     if len(book_list)!=0:
        book=book_list[0]
        if book.quantity>0:
-           return {"message":"This book is available."}
+           return {"message":"This book is available."},200
        else:
-           {"message":"This book was available in library but they have been issued."}
-    return {"message":"This book is not available."}
+           {"message":"This book was available in library but they have been issued."},200
+    return {"message":"This book is not available."},404
 
 
 @operation_api.route('/hypersearch',methods=['POST'])
@@ -43,7 +43,7 @@ def hypersearch():
                     "name": book.name,
                 }
             )
-    return {"members":result}
+    return {"members":result},200
 
 @operation_api.route('/issue',methods=['POST'])
 def issue():
@@ -56,18 +56,18 @@ def issue():
     list_of_member=list(Members.select(Members.q.id == member_id))
     print(list_of_member)
     if len(list_of_member)==0:
-        return {"message":"The member_id is incorrect.please check it or create a new membership"}
+        return {"message":"The member_id is incorrect.please check it or create a new membership"},400
     member=list_of_member[0]
     print(member)
     list_of_book=list(Books.select(Books.q.name==book_name))
     if len(list_of_book)==0:
-        return {"message":f"{book_name} is not available in the library kindly look for another book."}
+        return {"message":f"{book_name} is not available in the library kindly look for another book."},400
     
     book=list_of_book[0]
     if book.quantity==0:
-        return {"message":f"{book_name} is not available whenever it will be returned we will let you know"}
+        return {"message":f"{book_name} is not available whenever it will be returned we will let you know"},400
     if member.debt>500:
-        return {"message":"Your balance is less than minimum criteria. Please recharge your account"}
+        return {"message":"Your balance is less than minimum criteria. Please recharge your account"},400
     book_id=book.id
     transaction=Transactions(book_id=book_id,member_id=member_id)
         
@@ -75,7 +75,7 @@ def issue():
     book.popularity+=1
         
     print(transaction)
-    return {"message":f"Here's your book - {book_name} and your transaction id =  {transaction.id} have a happy reading"}
+    return {"message":f"Here's your book - {book_name} and your transaction id =  {transaction.id} have a happy reading"},200
  
 
 @operation_api.route('/return',methods=['POST'])
@@ -114,9 +114,9 @@ def book_return():
                 return  {"message":f"your fine is rupees {fine} , and your debt is {member.debt} which is less than minimum criteria, please RECHARGE otherwise you will be unable to use our services.Thanks for using the book"}
             return {"message":f"your fine is rupees {fine} , and your debt is {member.debt} thanks for using the book"}
         else:
-            return {"message":"This transaction is now expired kindly give a appropriate transaction id."}
+            return {"message":"This transaction is now expired kindly give a appropriate transaction id."},400
     else:
-        return {"message":"this is a wrong transaction_id, Please provide a valid one"}
+        return {"message":"this is a wrong transaction_id, Please provide a valid one"},400
 
 @operation_api.route('/payment',methods=['POST'])
 def fine():
@@ -132,8 +132,8 @@ def fine():
         member=member_list[0]
         member.debt-=payment
         member.total_payment+=payment
-        return {"message":f"{payment} rupee has been transferred and now the remaining debt is {member.debt} "}
-    return {"message":"This id is not a valid member_id. Please register first."}
+        return {"message":f"{payment} rupee has been transferred and now the remaining debt is {member.debt} "},200
+    return {"message":"This id is not a valid member_id. Please register first."},400
 
 
 @operation_api.route('/popular',methods=['GET'])
@@ -145,5 +145,5 @@ def popular():
     members=Members.select().orderBy(Members.sqlrepr("total_payment"))
     most_popular_book = max(books, key=lambda x: x.popularity).name
     most_paying_member= max(members, key=lambda x:x.total_payment).name
-    return {"message":f"{most_popular_book} is the most popular book and {most_paying_member} is the most paying member."}
+    return {"message":f"{most_popular_book} is the most popular book and {most_paying_member} is the most paying member."},200
 
