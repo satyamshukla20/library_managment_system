@@ -22,7 +22,7 @@ def loadmembers():
             Members(name=name, email=email)
             return {"message": "The user is successfully registered as member."},200
         except:
-            return {"message": "This user already exists."},400
+            return {"message": "This user already exists."},200
 
 
 @member_api.route("/member", methods=["GET"])
@@ -47,18 +47,18 @@ def member_delete(id):
     try:
         member = Members.get(id)
     except SQLObjectNotFound:
-        return {"message": "please enter a valid id"},400
+        return {"message": "please enter a valid id"},404
     
     if member.debt > 0:
         return {
             "message": f"{member.name} with {id} as id has current debt of {member.debt} please pay the remaining amount."
-        },400
+        },200
     id=int(id)
     list_of_transaction=list(Transactions.select(Transactions.q.member_id==id))
     if len(list_of_transaction)>0:
         for transaction in list_of_transaction:
             if transaction.transaction_status==1:
-                return {"message":"This user cannot be deleted because he has issued a book."},400
+                return {"message":"This user cannot be deleted because he has issued a book."},200
     id=str(id)
     member.delete(id)
     

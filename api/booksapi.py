@@ -32,10 +32,10 @@ def loadbooks():
                 name=i['name']
                 author=i['author']
                 Books(name=name,author=author)
-    except dberrors.DuplicateEntryError:
+    except Exception as e:
         return {"message":"books are already loaded."}, 200
 
-    return {"message":"books have been successfully loaded in the database."}
+    return {"message":"books have been successfully loaded in the database."},200
 
 @book_api.route('/addbook', methods = ['POST'])
 def addbooks():
@@ -43,10 +43,13 @@ def addbooks():
     this is the add_book endpoint
     """
     request_data=request.json
-    name=request_data.get('name')
-    author=request_data.get('author')
-    quantity=request_data.get('quantity')
-    book=Books(name=name,author=author,quantity=quantity)
+    try:
+        name=request_data.get('name')
+        author=request_data.get('author')
+        quantity=request_data.get('quantity')
+        book=Books(name=name,author=author,quantity=quantity)
+    except Exception as e:
+        return {"message":"this book is already present"},200
     return {"message":f"{name} has been successfully added."},200
 
 @book_api.route('/book/<id>', methods = ['DELETE'])
